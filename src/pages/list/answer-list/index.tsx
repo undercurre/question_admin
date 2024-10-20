@@ -1,4 +1,4 @@
-import { getQuestions, Question } from '@/apis/question';
+import { Answer, getAnswers } from '@/apis/question';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import { PageContainer, ProDescriptions, ProTable } from '@ant-design/pro-components';
 import { Drawer, message } from 'antd';
@@ -11,7 +11,7 @@ import UpdateForm from './components/UpdateForm';
  * @param fields
  */
 
-const handleUpdate = async (fields: FormValueType, currentRow?: Question) => {
+const handleUpdate = async (fields: FormValueType, currentRow?: Answer) => {
   console.log(fields, currentRow);
   const hide = message.loading('正在配置');
 
@@ -33,20 +33,30 @@ const TableList: React.FC = () => {
   const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
   const [showDetail, setShowDetail] = useState<boolean>(false);
   const actionRef = useRef<ActionType>();
-  const [currentRow, setCurrentRow] = useState<Question>();
+  const [currentRow, setCurrentRow] = useState<Answer>();
   /** 国际化配置 */
 
-  const columns: ProColumns<Question>[] = [
+  const columns: ProColumns<Answer>[] = [
     {
-      title: '内容',
-      dataIndex: 'content',
+      title: '问题',
+      dataIndex: 'question.content',
       render: (dom) => {
         return <div>{dom}</div>;
       },
     },
     {
-      title: '答案',
+      title: '此次答案',
+      dataIndex: 'userAnswer',
+      valueType: 'textarea',
+    },
+    {
+      title: '标准答案',
       dataIndex: 'answer',
+      valueType: 'textarea',
+    },
+    {
+      title: '成绩',
+      dataIndex: 'score',
       valueType: 'textarea',
     },
     {
@@ -58,17 +68,33 @@ const TableList: React.FC = () => {
         return form.getFieldValue('createdAt');
       },
     },
+    {
+      title: '操作',
+      dataIndex: 'option',
+      valueType: 'option',
+      render: (_, record) => [
+        <a
+          key="config"
+          onClick={() => {
+            handleUpdateModalVisible(true);
+            setCurrentRow(record);
+          }}
+        >
+          更新
+        </a>,
+      ],
+    },
   ];
 
   return (
     <PageContainer>
-      <ProTable<Question>
+      <ProTable<Answer>
         headerTitle="查询表格"
         actionRef={actionRef}
         rowKey="key"
         search={false}
         toolBarRender={() => []}
-        request={getQuestions}
+        request={getAnswers}
         columns={columns}
       />
       <UpdateForm
@@ -101,17 +127,17 @@ const TableList: React.FC = () => {
         }}
         closable={false}
       >
-        {currentRow?.content && (
-          <ProDescriptions<Question>
+        {currentRow?.userAnswer && (
+          <ProDescriptions<Answer>
             column={2}
-            title={currentRow?.content}
+            title={currentRow?.userAnswer}
             request={async () => ({
               data: currentRow || {},
             })}
             params={{
-              id: currentRow?.content,
+              id: currentRow?.userAnswer,
             }}
-            columns={columns as ProDescriptionsItemProps<Question>[]}
+            columns={columns as ProDescriptionsItemProps<Answer>[]}
           />
         )}
       </Drawer>
