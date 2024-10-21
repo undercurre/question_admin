@@ -1,6 +1,6 @@
-﻿import type { RequestOptions } from '@@/plugin-request/request';
-import type { RequestConfig } from '@umijs/max';
+﻿import { AxiosResponse, history, request, RequestOptions, type RequestConfig } from '@umijs/max';
 import { message, notification } from 'antd';
+import { refreshToken } from './apis/auth';
 import { getInitialState } from './app';
 
 // 错误处理方案： 错误类型
@@ -18,6 +18,36 @@ interface ResponseStructure {
   errorCode?: number;
   errorMessage?: string;
   showType?: ErrorShowType;
+}
+
+async function useRefreshToken(response: AxiosResponse) {
+  // 获取初始状态
+  const initialState = await getInitialState();
+
+  // 使用 refreshToken 获取新的 token
+  const refreshResponse = await refreshToken();
+  console.log('refreshToken', refreshResponse);
+
+  if (refreshResponse.data && refreshResponse.data.access_token) {
+    // 更新 token
+    const newToken = refreshResponse.data.access_token;
+    initialState.token = newToken;
+    localStorage.setItem('token', newToken);
+
+    // 重新发起原始请求
+    const retryResponse = await request(response.config.url!, {
+      ...response.config,
+      headers: {
+        ...response.config.headers,
+        Authorization: `Bearer ${newToken}`,
+      },
+    });
+
+    return retryResponse;
+  } else {
+    // refresh-token 请求失败，跳转到登录页
+    history.push('/user/login');
+  }
 }
 
 /**
@@ -73,7 +103,13 @@ export const errorConfig: RequestConfig = {
       } else if (error.response) {
         // Axios 的错误
         // 请求成功发出且服务器也响应了状态码，但状态代码超出了 2xx 的范围
-        message.error(`Response status:${error.response.status}`);
+        console.log('请求地址', error.response.config.url);
+        if (error.response.status === 401 && !error.response.config.url.includes('refresh-token')) {
+          // eslint-disable-next-line react-hooks/rules-of-hooks
+          useRefreshToken(error.response);
+        } else {
+          message.error(`Response status:${error.response.status}`);
+        }
       } else if (error.request) {
         // 请求已经成功发起，但没有收到响应
         // \`error.request\` 在浏览器中是 XMLHttpRequest 的实例，

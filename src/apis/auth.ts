@@ -34,7 +34,12 @@ export const loginApi = (params: ReqLoginForm) => {
 };
 
 export const refreshToken = () => {
-  return request(authport + '/refresh-token', {
+  return request<
+    Result<{
+      access_token: string;
+    }>
+  >(authport + '/refresh-token', {
     method: 'POST',
+    withCredentials: true,
   });
 };

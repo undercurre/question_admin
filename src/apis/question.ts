@@ -53,3 +53,13 @@ export const getAnswers = async () => {
   const initState = await getInitialState();
   return request<Result<Array<Answer>>>(`${answerport}/user/${initState.currentUser?.userid}`);
 };
+
+export const updateAnswers = async (
+  answerId: string,
+  data: { userAnswer?: string; score?: number },
+) => {
+  return request<Result<Array<Answer>>>(`${answerport}/${answerId}`, {
+    method: 'PUT',
+    data,
+  });
+};

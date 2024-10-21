@@ -1,158 +1,35 @@
-import { Question } from '@/apis/question';
-import {
-  ProFormDateTimePicker,
-  ProFormRadio,
-  ProFormSelect,
-  ProFormText,
-  ProFormTextArea,
-  StepsForm,
-} from '@ant-design/pro-components';
-import { Modal } from 'antd';
+import { Answer } from '@/apis/question';
+import { InputNumber, InputNumberProps, Modal } from 'antd';
 import React from 'react';
 
-export type FormValueType = {
-  target?: string;
-  template?: string;
-  type?: string;
-  time?: string;
-  frequency?: string;
-} & Partial<Question>;
-
 export type UpdateFormProps = {
-  onCancel: (flag?: boolean, formVals?: FormValueType) => void;
-  onSubmit: (values: FormValueType) => Promise<void>;
+  onCancel: () => void;
+  onSubmit: () => void;
   updateModalVisible: boolean;
-  values: Partial<Question>;
+  values: Partial<Answer>;
 };
 
 const UpdateForm: React.FC<UpdateFormProps> = (props) => {
+  const onChange: InputNumberProps['onChange'] = (value) => {
+    console.log('changed', value);
+  };
+
   return (
-    <StepsForm
-      stepsProps={{
-        size: 'small',
+    <Modal
+      width={640}
+      bodyStyle={{
+        padding: '32px 40px 48px',
       }}
-      stepsFormRender={(dom, submitter) => {
-        return (
-          <Modal
-            width={640}
-            bodyStyle={{
-              padding: '32px 40px 48px',
-            }}
-            destroyOnClose
-            title="规则配置"
-            open={props.updateModalVisible}
-            footer={submitter}
-            onCancel={() => {
-              props.onCancel();
-            }}
-          >
-            {dom}
-          </Modal>
-        );
+      destroyOnClose
+      title="评分"
+      open={props.updateModalVisible}
+      onCancel={() => {
+        props.onCancel();
       }}
-      onFinish={props.onSubmit}
+      onOk={props.onSubmit}
     >
-      <StepsForm.StepForm
-        initialValues={{
-          content: props.values.content,
-          answer: props.values.answer,
-        }}
-        title="基本信息"
-      >
-        <ProFormText
-          name="name"
-          label="规则名称"
-          width="md"
-          rules={[
-            {
-              required: true,
-              message: '请输入规则名称！',
-            },
-          ]}
-        />
-        <ProFormTextArea
-          name="desc"
-          width="md"
-          label="规则描述"
-          placeholder="请输入至少五个字符"
-          rules={[
-            {
-              required: true,
-              message: '请输入至少五个字符的规则描述！',
-              min: 5,
-            },
-          ]}
-        />
-      </StepsForm.StepForm>
-      <StepsForm.StepForm
-        initialValues={{
-          target: '0',
-          template: '0',
-        }}
-        title="配置规则属性"
-      >
-        <ProFormSelect
-          name="target"
-          width="md"
-          label="监控对象"
-          valueEnum={{
-            0: '表一',
-            1: '表二',
-          }}
-        />
-        <ProFormSelect
-          name="template"
-          width="md"
-          label="规则模板"
-          valueEnum={{
-            0: '规则模板一',
-            1: '规则模板二',
-          }}
-        />
-        <ProFormRadio.Group
-          name="type"
-          label="规则类型"
-          options={[
-            {
-              value: '0',
-              label: '强',
-            },
-            {
-              value: '1',
-              label: '弱',
-            },
-          ]}
-        />
-      </StepsForm.StepForm>
-      <StepsForm.StepForm
-        initialValues={{
-          type: '1',
-          frequency: 'month',
-        }}
-        title="设定调度周期"
-      >
-        <ProFormDateTimePicker
-          name="time"
-          width="md"
-          label="开始时间"
-          rules={[
-            {
-              required: true,
-              message: '请选择开始时间！',
-            },
-          ]}
-        />
-        <ProFormSelect
-          name="frequency"
-          label="监控对象"
-          width="md"
-          valueEnum={{
-            month: '月',
-            week: '周',
-          }}
-        />
-      </StepsForm.StepForm>
-    </StepsForm>
+      <InputNumber min={0} max={100} defaultValue={props.values.score} onChange={onChange} />
+    </Modal>
   );
 };
 
