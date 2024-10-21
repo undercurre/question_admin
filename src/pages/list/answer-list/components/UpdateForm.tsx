@@ -4,15 +4,22 @@ import React from 'react';
 
 export type UpdateFormProps = {
   onCancel: () => void;
-  onSubmit: () => void;
+  onSubmit: (value: number) => void;
   updateModalVisible: boolean;
   values: Partial<Answer>;
 };
 
 const UpdateForm: React.FC<UpdateFormProps> = (props) => {
+  let current = props.values.score;
+
   const onChange: InputNumberProps['onChange'] = (value) => {
     console.log('changed', value);
+    current = value as number;
   };
+
+  function handleSubmit() {
+    if (current) props.onSubmit(current);
+  }
 
   return (
     <Modal
@@ -26,7 +33,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
       onCancel={() => {
         props.onCancel();
       }}
-      onOk={props.onSubmit}
+      onOk={handleSubmit}
     >
       <InputNumber min={0} max={100} defaultValue={props.values.score} onChange={onChange} />
     </Modal>

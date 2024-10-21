@@ -1,4 +1,4 @@
-import { Answer, getAnswers } from '@/apis/question';
+import { Answer, getAnswers, updateAnswers } from '@/apis/question';
 import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import { PageContainer, ProDescriptions, ProTable } from '@ant-design/pro-components';
 import { Drawer } from 'antd';
@@ -13,8 +13,12 @@ const TableList: React.FC = () => {
   const actionRef = useRef<ActionType>();
   const [currentRow, setCurrentRow] = useState<Answer>();
 
-  function onUpdatedSubmit() {
-    
+  async function onUpdatedSubmit(value: number) {
+    if (currentRow && actionRef.current) {
+      await updateAnswers(currentRow?.id, { score: value });
+      actionRef.current.reload();
+      handleUpdateModalVisible(false);
+    }
   }
 
   function onUpdatedCancel() {
@@ -70,7 +74,7 @@ const TableList: React.FC = () => {
             setCurrentRow(record);
           }}
         >
-          更新
+          评分
         </a>,
       ],
     },
